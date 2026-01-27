@@ -1,0 +1,13 @@
+@echo off
+echo Starting Windows Build...
+if not exist venv (
+    echo Creating virtual environment...
+    python -m venv venv
+)
+call venv\Scripts\activate
+echo Installing dependencies...
+pip install customtkinter matplotlib requests pystray plyer Pillow cryptography pyinstaller
+echo Running PyInstaller...
+pyinstaller --noconfirm LibreViewMonitor.spec
+echo Build complete. Check the dist/ directory.
+pause
