@@ -151,7 +151,7 @@ elif sys.platform == 'win32':
 
         vs_version_info = VSVersionInfo(
             ffi=vs_fixed,
-            kids=[StringFileInfo([string_table]), VarFileInfo([('Translation', [0x0409, 1252])])],
+            kids=[StringFileInfo([string_table])],
         )
     except Exception:
         vs_version_info = None
@@ -170,7 +170,8 @@ elif sys.platform == 'win32':
         upx=True,
         console=False,
         icon=ico,
-        version=vs_version_info,
+        # Windows version resource removed to avoid build-time issues;
+        # pass 'version=vs_version_info' here if VSVersionInfo is known-good in your environment
     )
 else:
     # Linux/other: create a single-file executable
