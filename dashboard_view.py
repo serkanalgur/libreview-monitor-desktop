@@ -87,7 +87,16 @@ class DashboardView(ctk.CTkFrame):
         self.trend_label.configure(text=arrow)
         self.time_label.configure(text=f"Last updated: {datetime.now().strftime('%H:%M:%S')}")
         
-        self._update_graph(glucose_data.get("graph", []))
+        graph_payload = glucose_data.get("graph", [])
+        # Lightweight logging to help debug graph payload shape
+        try:
+            print(f"[Dashboard] Received graph payload: count={len(graph_payload)}")
+            for i, item in enumerate(graph_payload[:5]):
+                print(f"[Dashboard] graph[{i}] = {item}")
+        except Exception:
+            pass
+
+        self._update_graph(graph_payload)
         self.status_bar.configure(text="Data updated successfully")
 
     def _update_graph(self, graph_points):
@@ -101,16 +110,49 @@ class DashboardView(ctk.CTkFrame):
         times = []
         values = []
         for p in graph_points:
-            ts = p.get("Timestamp")
-            val = p.get("Value")
-            if ts and val:
-                # Format: 2026-01-28T01:28:45
-                try:
-                    dt = datetime.fromisoformat(ts.split('.')[0])
-                    times.append(dt)
-                    values.append(val)
-                except:
-                    continue
+            # accept multiple key variants depending on API payload
+            ts_raw = p.get("Timestamp") or p.get("timestamp") or p.get("FactoryTimestamp")
+            # prefer mg/dL value when available
+            val_raw = p.get("ValueInMgPerDl") or p.get("Value") or p.get("value")
+            if not ts_raw or val_raw is None:
+                continue
+
+            ts_str = str(ts_raw).strip()
+            dt = None
+            # Try a list of known timestamp formats
+            tried = []
+            try:
+                # ISO style first
+                ts_iso = ts_str.split('.')[0].rstrip('Z')
+                dt = datetime.fromisoformat(ts_iso)
+            except Exception:
+                tried.append('iso')
+
+            if dt is None:
+                # Common US format like: 1/27/2026 11:48:33 PM
+                fmts = [
+                    '%m/%d/%Y %I:%M:%S %p',
+                    '%m/%d/%Y %H:%M:%S',
+                    '%Y-%m-%d %H:%M:%S',
+                ]
+                for f in fmts:
+                    try:
+                        dt = datetime.strptime(ts_str, f)
+                        break
+                    except Exception:
+                        tried.append(f)
+
+            if dt is None:
+                continue
+
+            # Ensure numeric value (ValueInMgPerDl is likely already mg/dL int)
+            try:
+                val = float(val_raw)
+            except Exception:
+                continue
+
+            times.append(dt)
+            values.append(val)
         
         if times:
             self.ax.plot(times, values, color='#3498db', linewidth=2)
