@@ -205,10 +205,17 @@ class LibreViewMonitorApp(ctk.CTk):
         except Exception:
             pass
         
-        ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("blue")
-        
+
         self.config = Config()
+        # Apply stored appearance mode (light/dark/system)
+        try:
+            ctk.set_appearance_mode(self.config.appearance_mode or "system")
+        except Exception:
+            try:
+                ctk.set_appearance_mode("system")
+            except Exception:
+                pass
         self.api = LibreViewAPI(region=self.config.region)
         self.api.min_version = self.config.min_version
         
@@ -258,8 +265,9 @@ class LibreViewMonitorApp(ctk.CTk):
     def _show_dashboard(self):
         if hasattr(self, "login"):
             self.login.destroy()
-        self.dashboard = DashboardView(self, on_refresh=self._force_refresh, on_logout=self._handle_logout)
+        self.dashboard = DashboardView(self, on_refresh=self._force_refresh, on_logout=self._handle_logout, config=self.config)
         self.dashboard.pack(fill="both", expand=True)
+        
 
     def _handle_login(self, email, password):
         def _login_thread():

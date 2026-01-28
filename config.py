@@ -14,6 +14,7 @@ class Config:
         self.email = ""
         self.region = None
         self.min_version = "4.16.0"
+        self.appearance_mode = "system"
         self.low_threshold = 70
         self.high_threshold = 180
         self.encrypted_password = ""
@@ -38,6 +39,7 @@ class Config:
                     self.email = data.get("email", "")
                     self.region = data.get("region")
                     self.min_version = data.get("min_version", "4.16.0")
+                    self.appearance_mode = data.get("appearance_mode", "system")
                     self.low_threshold = data.get("low_threshold", 70)
                     self.high_threshold = data.get("high_threshold", 180)
                     self.encrypted_password = data.get("password_enc", "")
@@ -49,6 +51,7 @@ class Config:
             "email": self.email,
             "region": self.region,
             "min_version": self.min_version,
+            "appearance_mode": self.appearance_mode,
             "low_threshold": self.low_threshold,
             "high_threshold": self.high_threshold,
             "password_enc": self.encrypted_password
