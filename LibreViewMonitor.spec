@@ -2,11 +2,19 @@
 import os
 import sys
 import customtkinter
+from pathlib import Path
 
 ctk_path = os.path.dirname(customtkinter.__file__)
 
 # Use repository root as pathex so relative imports/resources resolve
 project_root = os.path.abspath('.')
+
+# Application version: prefer a VERSION file at project root, fallback to 0.1.0
+ver_file = Path(project_root) / 'VERSION'
+if ver_file.exists():
+    APP_VERSION = ver_file.read_text().strip()
+else:
+    APP_VERSION = '0.1.0'
 
 # Base hidden imports required across platforms
 hiddenimports = [
@@ -92,11 +100,61 @@ if sys.platform == 'darwin':
         name='LibreViewMonitor.app',
         icon=icns,
         bundle_identifier='com.serkanalgur.libreviewmonitor',
+        plist={
+            'CFBundleShortVersionString': APP_VERSION,
+            'CFBundleVersion': APP_VERSION,
+        },
     )
 elif sys.platform == 'win32':
     # Windows: create a single-file executable (onefile)
     ico_path = os.path.join(project_root, 'icon.ico')
     ico = ico_path if os.path.exists(ico_path) else None
+
+    # Embed Windows version resource
+    try:
+        from PyInstaller.utils.win32.versioninfo import (
+            VSVersionInfo, FixedFileInfo, StringFileInfo, StringTable, VarFileInfo
+        )
+
+        def _ver_tuple(v):
+            parts = [int(x) for x in v.split('.') if x.isdigit()]
+            while len(parts) < 4:
+                parts.append(0)
+            return tuple(parts[:4])
+
+        filevers = _ver_tuple(APP_VERSION)
+        prodvers = filevers
+
+        vs_fixed = FixedFileInfo(
+            filevers=filevers,
+            prodvers=prodvers,
+            mask=0x3f,
+            flags=0x0,
+            OS=0x40004,
+            fileType=0x1,
+            subtype=0x0,
+            date=(0, 0),
+        )
+
+        string_table = StringTable(
+            '040904b0',
+            [
+                ('CompanyName', 'serkanalgur'),
+                ('FileDescription', 'LibreView Monitor'),
+                ('FileVersion', APP_VERSION),
+                ('InternalName', 'LibreViewMonitor'),
+                ('OriginalFilename', 'LibreViewMonitor.exe'),
+                ('ProductName', 'LibreViewMonitor'),
+                ('ProductVersion', APP_VERSION),
+            ]
+        )
+
+        vs_version_info = VSVersionInfo(
+            ffi=vs_fixed,
+            kids=[StringFileInfo([string_table]), VarFileInfo([('Translation', [0x0409, 1252])])],
+        )
+    except Exception:
+        vs_version_info = None
 
     exe = EXE(
         pyz,
@@ -112,6 +170,7 @@ elif sys.platform == 'win32':
         upx=True,
         console=False,
         icon=ico,
+        version=vs_version_info,
     )
 else:
     # Linux/other: create a single-file executable
