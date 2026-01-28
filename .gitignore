@@ -27,9 +27,6 @@ venv/
 .libreview_monitor.json
 .libreview_monitor.key
 
-# PyInstaller
-*.spec
-
 # macOS
 .DS_Store
 .AppleDouble

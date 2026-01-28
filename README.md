@@ -1,9 +1,10 @@
 # LibreView Monitor Desktop App
 
+![App Icon](logo/logo192.png)
+
 A modern, cross-platform desktop application to track your glucose levels in real-time using the LibreView API. Built with Python, CustomTkinter, and Matplotlib.
 
-![Aesthetics](https://img.shields.io/badge/Aesthetics-Premium-blueviolet)
-![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Windows-blue)
+![Aesthetics](https://img.shields.io/badge/Aesthetics-Premium-blueviolet) ![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Windows-blue)
 
 ## Features
 - **Real-time Monitoring**: Fetches glucose data every 3-5 minutes.
@@ -12,6 +13,12 @@ A modern, cross-platform desktop application to track your glucose levels in rea
 - **Color-Coded Tray Icon**: System tray icon that changes color based on glucose levels.
 - **Secure Storage**: Local AES encryption for credentials (no Keychain prompts).
 - **macOS Optimized**: Hidden Dock icon for the tray process and native notifications.
+
+---
+
+## Screenshot
+
+![App Screenshot](screenshot.png)
 
 ---
 
@@ -93,3 +100,4 @@ Your password is encrypted locally using the `cryptography` library. A unique ke
 
 ## Credits
 API logic inspired by [libreview-monitor](https://github.com/HansKre/libreview-monitor).
+
